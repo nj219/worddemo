@@ -1,9 +1,15 @@
 package com.example.worddemo.test;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
+import javax.persistence.Convert;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -13,18 +19,27 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.poi.hslf.blip.EMF;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
+import org.apache.poi.hwpf.model.PicturesTable;
 import org.apache.poi.hwpf.usermodel.HeaderStories;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.poi.hwpf.usermodel.Range;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFPictureData;
+import org.freehep.graphicsio.emf.EMFInputStream;
+import org.freehep.graphicsio.emf.EMFRenderer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import lombok.extern.slf4j.Slf4j;
+import sun.misc.BASE64Decoder;
 
 /**
  * @author: 牛杰
@@ -33,11 +48,12 @@ import lombok.extern.slf4j.Slf4j;
  * @version:
  */
 @Slf4j
+@Component
 public class Word2Html {
 
-    public static void main(String argv[]) {
+    public static void main(String arg[]) {
         try {
-            convert2Html("F://tt.doc", "f://1.html");
+            convert2Html("F://tt.doc", "f://file//1.html");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -46,6 +62,14 @@ public class Word2Html {
     public static void writeFile(String content, String path) {
         //利用jsoup解析HTML
         org.jsoup.nodes.Document doc = Jsoup.parse(content);
+
+        //取出职责内容,存库对应关系
+        String text = doc.text();
+        String s1 = text.split("Responsibilities 职责")[1];
+
+        String s2 = s1.split("5.1")[0];
+        System.out.println(s2);
+
 
         Elements table = doc.getElementsByTag("table");
 
@@ -58,6 +82,16 @@ public class Word2Html {
         child.before(node.toString());
         //删除多余页眉
         node.remove();
+
+        //遍历取出图片
+        Elements img = doc.select("img");
+        for (Element element : img) {
+            String src= element.attr("src");
+
+            if (src.endsWith("emf")) {
+
+            }
+        }
 
 
         //遍历取出所有a标签，解析href，替换为自己的接口,访问接口去数据库对比是否存在文件
@@ -77,9 +111,9 @@ public class Word2Html {
                 String[] split = href.split("/");
                 String s = split[split.length - 1];
 
-                href = "http://www.baidu.com/"+s; //修改style中的url值
+                href = "http://localhost/test/wordDoc/?word="+s; //修改style中的url值
             }
-            System.out.println(href);
+
 
 
             anode.attr("href", href);
@@ -115,7 +149,23 @@ public class Word2Html {
         //WordToHtmlUtils.loadDoc(new FileInputStream(inputFile));
         HeaderStories headerStories = new HeaderStories(wordDocument);
 
+
         /*StringBuilder text = wordDocument.getText();*/
+
+        PicturesTable picturesTable = wordDocument.getPicturesTable();
+        List<Picture> allPictures = picturesTable.getAllPictures();
+
+        for (Picture allPicture : allPictures) {
+            String mimeType = allPicture.getMimeType();
+            PictureType pictureType = allPicture.suggestPictureType();
+            byte[] rawContent = allPicture.getRawContent();
+
+            String s = UtilHelper.byte2Base64StringFun(rawContent);
+
+            System.out.println();
+        }
+
+
 
         /*int x = text.indexOf("Responsibilities 职责");
 
@@ -142,6 +192,8 @@ public class Word2Html {
             public String savePicture(byte[] content,
                                       PictureType pictureType, String suggestedName,
                                       float widthInches, float heightInches) {
+                String mime = pictureType.getMime();
+                PictureType bmp = PictureType.BMP;
                 return "" + suggestedName;
             }
         });
@@ -155,10 +207,18 @@ public class Word2Html {
         if (pics != null) {
             for (int i = 0; i < pics.size(); i++) {
                 Picture pic = (Picture) pics.get(i);
-                System.out.println();
+                String mimeType = pic.getMimeType();
+                System.out.println(pic);
+
                 try {
-                    pic.writeImageContent(new FileOutputStream("F:/"
+                    pic.writeImageContent(new FileOutputStream("F:/file/"
                             + pic.suggestFullFileName()));
+
+                    /*List<String> list = new ArrayList<>();
+                    list.add("F:/file/" + pic.suggestFullFileName());
+                    emfConversionPng(list);*/
+
+
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -178,5 +238,80 @@ public class Word2Html {
         out.close();
         writeFile(new String(out.toByteArray()), outPutFile);
     }
+
+    public static void saveBase64strToFile(String base64str){
+        if (base64str == null){
+            return ;
+        }
+        BASE64Decoder decoder = new BASE64Decoder();
+        try
+        {
+            byte[] b = decoder.decodeBuffer(base64str);
+            for(int i=0;i<b.length;++i)
+            {
+                if(b[i]<0){
+                    b[i]+=256;
+                }
+            }
+            String imgFilePath = "c:/base.jpg";//新生成的图片
+            OutputStream out = new FileOutputStream(imgFilePath);
+            out.write(b);
+            out.flush();
+            out.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void emfConversionPng(List<String> list) throws IOException {
+        if (list.size() > 0) {
+            // 对文件的命名进行重新修改
+            for (int i = 0; i < list.size(); i++) {
+                String saveUrl = list.get(i);
+                // 从doc文档解析的图片很有可能已经是png了，所以此处需要判断
+                if (saveUrl.contains("emf") || saveUrl.contains("EMF")) {
+                    InputStream is = new FileInputStream(saveUrl);
+                    EMFInputStream eis = new EMFInputStream(is,
+                            EMFInputStream.DEFAULT_VERSION);
+                    EMFRenderer emfRenderer = new EMFRenderer(eis);
+                    final int width = (int) eis.readHeader().getBounds()
+                            .getWidth();
+                    final int height = (int) eis.readHeader().getBounds()
+                            .getHeight();
+                    // 设置图片的大小和样式
+                    final BufferedImage result = new BufferedImage(width + 60,
+                            height + 40, BufferedImage.TYPE_4BYTE_ABGR);
+                    Graphics2D g2 = (Graphics2D) result.createGraphics();
+                    emfRenderer.paint(g2);
+                    String url = saveUrl.replace(
+                            saveUrl.substring(saveUrl.length() - 3), "bmp");
+                    File outputfile = new File(url);
+                    // 写入到磁盘中(格式设置为png背景不会变为橙色)
+                    boolean png = ImageIO.write(result, "bmp", outputfile);
+                    // 当前的图片写入到磁盘中后，将流关闭
+                    if (eis != null) {
+                        eis.close();
+                    }
+                    if (is != null) {
+                        is.close();
+                    }
+                } else if (saveUrl.contains("wmf") || saveUrl.contains("WMF")) {
+                    /*// 将wmf转svg
+                    String svgFile = saveUrl.substring(0,
+                            saveUrl.lastIndexOf(".wmf"))
+                            + ".svg";
+                    wmfToSvg(saveUrl, svgFile);
+                    // 将svg转png
+                    String jpgFile = saveUrl.substring(0,
+                            saveUrl.lastIndexOf(".wmf"))
+                            + ".png";
+                    svgToJpg(svgFile, jpgFile);*/
+                }
+            }
+        }
+    }
+
 
 }

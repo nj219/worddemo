@@ -1,49 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script type="text/javascript" charset="utf-8" src="ueditor/ueditor.config.js"></script>
-    <script type="text/javascript" charset="utf-8" src="ueditor/ueditor.all.js"></script>
-    <script type="text/javascript" charset="utf-8" src="ueditor/lang/zh-cn/zh-cn.js"></script>
-    <script type="text/javascript" src="jQuery-3.4.1.js"></script>
-    <style>.d1{color: #ff383d}</style>
-    <!--<script type="text/javascript">
-    //实例化编辑器
-    var ue = UE.getEditor('editor', {});
-    </script>-->
+    <meta charset=UTF-8">
+    <title>登录测试</title>
 </head>
 <body>
-
-<div id="editor" style="height:360px">
-    <script type="text/javascript" charset="utf-8">
-        UE.getEditor("editor")
-    </script>
-
-    <button id="btn" onclick="aa()">
-        提交<font class="d1">sfsdfsd</font>
-    </button>
+<h2>Hello World! Web Socket by Spring</h2>
+<div>
+    <span>sessionId:</span>
+    <%
+        HttpSession s = request.getSession();
+        out.println(s.getId());
+    %>
 </div>
+
+<input id="sessionId" type="hidden" value="<%=session.getId() %>"/>
+<input id="text" type="text"/>
+<button onclick="send()">发送消息</button>
+<hr/>
+<button onclick="closeWebSocket()">关闭WebSocket连接</button>
+<hr/>
+<div id="message"></div>
 </body>
-<script>
+<script type="text/javascript" src="http://localhost:8088/static/js/sockjs-0.3.min.js"></script>
+<script type="text/javascript">
+    var websocket = null;
+    //判断当前浏览器是否支持WebSocket
+    //判断当前浏览器是否支持WebSocket
+    if ('WebSocket' in window) {
+        websocket = new WebSocket("ws://localhost:8088/websocket/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
+    } else if ('MozWebSocket' in window) {
+        websocket = new MozWebSocket("ws://localhost:8088/websocket/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
+    } else {
+        websocket = new SockJS("http://localhost:8088/websocket/sockjs/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
+    }
+    //连接发生错误的回调方法
+    websocket.onerror = function () {
+        setMessageInnerHTML("WebSocket连接发生错误");
+    };
 
-    function aa() {
-        //console.log(UE.getEditor('editor').getAllHtml())
+    //连接成功建立的回调方法
+    websocket.onopen = function () {
+        setMessageInnerHTML("WebSocket连接成功");
+    }
 
-        //UE.getEditor('editor').setContent("");
+    //接收到消息的回调方法
+    websocket.onmessage = function (event) {
+        setMessageInnerHTML(event.data);
+    }
 
+    //连接关闭的回调方法
+    websocket.onclose = function () {
+        setMessageInnerHTML("WebSocket连接关闭");
+    }
 
+    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+    window.onbeforeunload = function () {
+        closeWebSocket();
+    }
 
-       /* $(function(){
-            window.setTimeout(setContent,1000);//一秒后再调用赋值方法
-        });
+    //将消息显示在网页上
+    function setMessageInnerHTML(innerHTML) {
+        document.getElementById('message').innerHTML += innerHTML + '<br/>';
+    }
 
-        //给ueditor插入值
-        function setContent(){
-            UE.getEditor('editor').execCommand('insertHtml', '<html><head><style>.d1{color: #ff383d}</style></head><body><font class="d1">sfsdfsd</font></body></html>');
-        }*/
+    //关闭WebSocket连接
+    function closeWebSocket() {
+        websocket.close();
+    }
+
+    //发送消息
+    function send() {
+        var message = document.getElementById('text').value;
+        websocket.send(message);
     }
 
 
+
+    function EMFTOBMP(): Boolean;stdcall;export;//将EMF类型转换为BMP文件
+    var SearchRes : TSearchRec;// 查找文件的结构
+    nFound, i : Integer;
+    Temp:Tbitmap;
+    EMF:TMetaFile;
+    reg       : TRegistry;
+    m_DestDir:String;
+    m_BmpDestFile:String;
+    DivNum,ModNum:integer;
+    BmpNum,BmpWidth:Integer;//定义BMP的显示位数和显示宽度
+    JudgeWidth:Integer;//定义BMP图是否限制宽度
+    begin
+    //初始化BMP文件的宽和显示位数。
+    BmpNum:=16;
+    BmpWidth:=832;
+    JudgeWidth:=1;
+    nFound := FindFirst(m_DestDir+'\*.emf', faAnyFile, SearchRes);
+    while nFound = 0 do
+        begin
+        //转换开始将EMF文件装换成BMP文件
+        EMF:=TMetaFile.Create;
+    Temp:=Tbitmap.Create();
+    case BmpNum of
+    1:
+    begin
+    Temp.PixelFormat:=pf1bit;
+    end;
+    4:
+    begin
+    Temp.PixelFormat:=pf4bit;
+    end;
+    16:
+    begin
+    Temp.PixelFormat:=pf16bit;
+    end;
+    24:
+    begin
+    Temp.PixelFormat:=pf24bit;
+    end;
+    32:
+    begin
+    Temp.PixelFormat:=pf32bit;
+    end;
+    end;
+    try
+    EMF.LoadFromFile(m_DestDir+'\'+SearchRes.Name);
+    if JudgeWidth=0 then
+    begin
+    temp.Width:=emf.Width;
+    end
+    else
+    begin
+    if emf.Width<BmpWidth then
+    begin
+    DivNum:=emf.Width div  32;
+    ModNum:=emf.Width mod  32;
+    if  ModNum>16 then
+    begin
+    Inc(DivNum);
+    end;
+    temp.Width:=DivNum * 32;
+    end
+    else
+    begin
+    temp.Width:=BmpWidth;
+    end;
+    end;
+    temp.Height:=emf.Height;
+    temp.Canvas.Draw(0,0,emf);
+    m_BmpDestFile:=Copy(SearchRes.Name,0,strlen(Pchar(SearchRes.Name))-4);
+    temp.SaveToFile(m_DestDir+'\'+m_BmpDestFile+'.bmp');
+    //删除Emf文件
+    DeleteFile(m_DestDir+'\'+SearchRes.Name);
+    finally
+    temp.free;
+    emf.free;
+    end;
+    nFound := FindNext(SearchRes);
+    end;
+    FindClose(SearchRes);
+    Result:=true;
+    end;
 </script>
 </html>
