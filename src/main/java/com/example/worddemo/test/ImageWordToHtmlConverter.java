@@ -4,6 +4,7 @@ import org.apache.poi.hwpf.converter.WordToHtmlConverter;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+
 /**
  * 处理doc文件转换html时的图片显示
  *

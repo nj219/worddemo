@@ -27,7 +27,7 @@ import org.freehep.graphicsio.emf.EMFRenderer;
 public class EMFReader {
 	public static void main(String[] args) {
 		try {
-			EMFInputStream inputStream = new EMFInputStream(new FileInputStream("F:\\4aba.emf"), EMFInputStream.DEFAULT_VERSION);
+			EMFInputStream inputStream = new EMFInputStream(new FileInputStream("F:\\file\\4aba.emf"), EMFInputStream.DEFAULT_VERSION);
 			System.out.println("height = " + inputStream.readHeader().getBounds().getHeight());
 			System.out.println("widht = " + inputStream.readHeader().getBounds().getWidth());
 			
