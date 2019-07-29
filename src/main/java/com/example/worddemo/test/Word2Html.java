@@ -85,7 +85,7 @@ public class Word2Html {
         Element node = table.get(table.size() - 1);
 
         //获取解析后的页眉，与之前做对比，如果相同，则提取
-        String text = node.text().replaceAll("\r|\n|\\s","");
+        String text = node.text().replaceAll("\\s", "");
 
         String s1 = header.replaceAll("\\s", "").replaceAll("\r", "");
 
@@ -98,7 +98,7 @@ public class Word2Html {
 
         //System.out.println(node);
         //把页眉替换到头部
-        Element child = div.first().child(0);
+            Element child = div.first().child(0);
         child.before(node.toString());
         //删除多余页眉
         node.remove();
@@ -106,7 +106,7 @@ public class Word2Html {
         //遍历取出图片
         Elements img = doc.select("img");
         for (Element element : img) {
-            String src= element.attr("src");
+            String src = element.attr("src");
 
             if (src.endsWith("emf")) {
 
@@ -118,22 +118,21 @@ public class Word2Html {
         Elements e = doc.select("a");
         for (int i = 0; i < e.size(); i++) {
             Element anode = e.get(i);
-            String href= anode.attr("href");
+            String href = anode.attr("href");
 
             if (href.startsWith("http") || href.startsWith("https")) {
 
             } else {
                 try {
-                    href= URLDecoder.decode(href,"UTF-8");
+                    href = URLDecoder.decode(href, "UTF-8");
                 } catch (UnsupportedEncodingException e1) {
                     e1.printStackTrace();
                 }
                 String[] split = href.split("/");
                 String s = split[split.length - 1];
 
-                href = "http://localhost/test/wordDoc/?word="+s; //修改style中的url值
+                href = "http://localhost/test/wordDoc/?word=" + s; //修改style中的url值
             }
-
 
 
             anode.attr("href", href);
@@ -164,6 +163,7 @@ public class Word2Html {
 
     /**
      * 解析doc
+     *
      * @param fileName
      * @param outPutFile
      * @throws TransformerException
@@ -224,7 +224,8 @@ public class Word2Html {
                                       PictureType pictureType, String suggestedName,
                                       float widthInches, float heightInches) {
                 String mime = pictureType.getMime();
-                PictureType bmp = PictureType.BMP;
+
+
                 return "" + suggestedName;
             }
         });
@@ -249,10 +250,6 @@ public class Word2Html {
                     list.add("F:/file/" + pic.suggestFullFileName());
                     emfConversionPng(list);*/
 
-
-
-
-
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -273,8 +270,6 @@ public class Word2Html {
         out.close();
         writeFile(new String(out.toByteArray()), outPutFile, header);
     }
-
-
 
 
     public static void emfConversionPng(List<String> list) throws IOException {
@@ -298,10 +293,10 @@ public class Word2Html {
                     Graphics2D g2 = (Graphics2D) result.createGraphics();
                     emfRenderer.paint(g2);
                     String url = saveUrl.replace(
-                            saveUrl.substring(saveUrl.length() - 3), "jpg");
+                            saveUrl.substring(saveUrl.length() - 3), "bmp");
                     File outputfile = new File(url);
                     // 写入到磁盘中(格式设置为png背景不会变为橙色)
-                    boolean png = ImageIO.write(result, "jpg", outputfile);
+                    boolean png = ImageIO.write(result, "bmp", outputfile);
                     // 当前的图片写入到磁盘中后，将流关闭
                     if (eis != null) {
                         eis.close();
