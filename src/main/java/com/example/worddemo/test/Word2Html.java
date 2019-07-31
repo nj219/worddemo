@@ -2,6 +2,8 @@ package com.example.worddemo.test;
 
 import java.io.*;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.XMLConstants;
@@ -28,6 +30,7 @@ import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.poi.hwpf.usermodel.Range;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.openxml4j.opc.ZipPackagePart;
+import org.apache.poi.poifs.property.Child;
 import org.apache.poi.xwpf.converter.core.BasicURIResolver;
 import org.apache.poi.xwpf.converter.core.FileImageExtractor;
 import org.apache.poi.xwpf.converter.xhtml.XHTMLConverter;
@@ -36,6 +39,7 @@ import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
 import org.springframework.stereotype.Component;
@@ -290,6 +294,7 @@ public class Word2Html {
         XWPFHeader header = headerFooterPolicy.getDefaultHeader();  //页眉
         XWPFFooter footer = headerFooterPolicy.getDefaultFooter();  //页脚
 
+        //页眉
         List<XWPFTable> headerTables = header.getTables();
         for (XWPFTable table : headerTables) {
             //页眉解析
@@ -297,19 +302,31 @@ public class Word2Html {
 
             String s = ctTbl.toString();
 
+            //解析xml后返回的HTML数据
             String form = parsingXML(s);
 
-            System.out.println();
+            //解析HTML替换某些参数
+            org.jsoup.nodes.Document parse = Jsoup.parse(form);
+            Elements div = parse.select("div");
 
-            String text = table.getText();
+            div.get(2).attr("style","display: inline-block;border-right:1px solid #000;padding-right: 50px");
+            String text = div.get(3).text();
+            div.get(3).attr("style","display: inline-block;text-align: right;float: right");
+            div.get(2).appendElement("img style=\"width:1.8988042in;height:0.4295625in;vertical-align:text-bottom;\" src=\"639c.png\"");
 
+            Elements span = parse.select("span");
+            for (Element pan : span) {
+                if (pan.text().equals("□")) {
+                    pan.attr("style", "font-family: 宋体");
+                }
+            }
 
             //XHTMLConverter.getInstance().convert(part, new FileOutputStream("F:\\file\\1.html"), options);
             System.out.println();
         }
 
-        //List<XWPFTable> footerTables = footer.getTables();
-        XWPFDocument xwpfDocument = footer.getXWPFDocument();
+        //页脚
+        List<XWPFTable> footerTables = footer.getTables();
 
 
 
@@ -368,12 +385,17 @@ public class Word2Html {
         org.jsoup.nodes.Document doc = Jsoup.parse(s);
 
         Elements wtr = doc.getElementsByTag("w:tr");
-        html += "<div style=\"width:50%; margin: 0 auto;\"><table border style=\"table-layout:fixed;border-collapse:collapse;border-spacing:0;width: 100%;\">";
+
+        ArrayList<Integer> tList = new ArrayList();
+        int total = 0;
+
+        html += "<div style=\"margin: 0 auto; display:inline-block;\">";
         for (Element tr : wtr) {
-            html += "<tr>";
+            html += "<div style=\"border:1px solid #000\">";
             Elements wtc = tr.getElementsByTag("w:tc");
             for (Element tc : wtc) {
-                html += "<td><p style='margin: 0px 0px 0px;'>";
+                html += "<div style=\"display: inline-block;border-left:1px solid #000;padding-right: 50px\">";
+                total++;
                 Elements wp = tc.getElementsByTag("w:p");
                 for (Element p : wp) {
                     Elements wr = p.getElementsByTag("w:r");
@@ -407,31 +429,33 @@ public class Word2Html {
                             }
 
                             if (!wb.isEmpty()) {
-                                eleWb = "font-weight: bold ;";
+                                eleWb = "font-weight: bold;";
                             }
 
-                            /*if (!wbcs.isEmpty()) {
+                            if (!wbcs.isEmpty()) {
                                 eleWbcs = "<br />";
-                            }*/
+                            }
                         }
 
                         for (Element t : wt) {
                             if (attrwjc != "") {
-                                html += eleWbcs + "<p style='text-align: "+attrwjc+"'><span style=\"" + attrfont + eleWb  + "\">" + t.text() + "</span></p>";
+                                html += eleWbcs + "<span style='text-align: "+attrwjc + ";" + attrfont + eleWb + "'>" + t.text() + "</span>";
                             } else {
                                 html += eleWbcs + "<span style=\"" + attrfont + eleWb  + "\">" + t.text() + "</span>";
                             }
+
 
                         }
 
                     }
                 }
-                html += "</p></td>";
+                html += "</div>";
             }
-            html += "</tr>";
+            tList.add(total);
+            total = 0;
+            html += "</div>";
         }
-        html += "</table></div>";
-        String s1 = html.toString();
+        html += "</div>";
         return html;
     }
 
