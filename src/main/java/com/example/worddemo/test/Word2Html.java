@@ -41,6 +41,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHdrFtr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -315,9 +316,11 @@ public class Word2Html {
             div.get(2).appendElement("img style=\"width:1.8988042in;height:0.4295625in;vertical-align:text-bottom;\" src=\"639c.png\"");
 
             Elements span = parse.select("span");
+            span.get(1).attr("style", "text-align: right;font-family: 宋体;font-weight: bold;");
+            span.get(0).attr("style", "text-align: right;font-family: Times New Roman;font-weight: bold;");
             for (Element pan : span) {
                 if (pan.text().equals("□")) {
-                    pan.attr("style", "font-family: 宋体");
+                    pan.attr("style", "font-family: 宋体;float: left; display: block;");
                 }
             }
 
@@ -327,6 +330,11 @@ public class Word2Html {
 
         //页脚
         List<XWPFTable> footerTables = footer.getTables();
+        String text = footer.getText();
+        XWPFFooter footerArray = document.getFooterArray(0);
+        CTHdrFtr ctHdrFtr = footerArray._getHdrFtr();  //页脚xml
+
+        String footerHtml = footerParsing(ctHdrFtr.toString());
 
 
 
@@ -376,7 +384,45 @@ public class Word2Html {
     }
 
     /**
-     * 解析xml
+     * 解析页脚xml
+     * @param footer
+     * @return
+     */
+    private static String footerParsing(String footer) {
+        String html = "";
+        org.jsoup.nodes.Document doc = Jsoup.parse(footer);
+
+        Elements wp = doc.getElementsByTag("w:p");
+
+        for (Element p : wp) {
+            html += "<p>";
+            Elements wr = p.getElementsByTag("w:r");
+            for (Element r : wr) {
+                Elements wrpr = r.getElementsByTag("w:rPr");
+                Elements wt = r.getElementsByTag("w:t");
+
+                String font = "";
+                String color = "";
+                for (Element rpr : wrpr) {
+                    Elements wrfonts = rpr.getElementsByTag("w:rFonts");
+                    font = wrfonts.get(0).attr("w:hAnsi");
+
+                    Elements wcolor = rpr.getElementsByTag("w:color");
+                    color = wcolor.get(0).attr("w:val");
+                }
+
+                for (Element t : wt) {
+                    html += "<span style='font-family: " + font + ";color: #" + color + "'>" + t.text() + "</span>";
+                }
+            }
+            html += "</p>";
+        }
+
+        return html;
+    }
+
+    /**
+     * 解析页眉xml
      * @param s
      * @return
      */
@@ -439,9 +485,9 @@ public class Word2Html {
 
                         for (Element t : wt) {
                             if (attrwjc != "") {
-                                html += eleWbcs + "<span style='text-align: "+attrwjc + ";" + attrfont + eleWb + "'>" + t.text() + "</span>";
+                                html += eleWbcs + "<span style='float: left; display: block; text-align: "+attrwjc + ";" + attrfont + eleWb + "'>" + t.text() + "</span>";
                             } else {
-                                html += eleWbcs + "<span style=\"" + attrfont + eleWb  + "\">" + t.text() + "</span>";
+                                html += eleWbcs + "<span style=\"float: left; display: block;" + attrfont + eleWb  + "\">" + t.text() + "</span>";
                             }
 
 
