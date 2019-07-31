@@ -1,16 +1,10 @@
 package com.example.worddemo.test;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-import javax.persistence.Convert;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -20,13 +14,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.poi.common.usermodel.HyperlinkType;
-import org.apache.poi.ddf.EscherBlipRecord;
-import org.apache.poi.hslf.blip.EMF;
-import org.apache.poi.hssf.record.HyperlinkRecord;
-import org.apache.poi.hssf.usermodel.HSSFHyperlink;
+import com.sun.javaws.jnl.XMLFormat;
+import fr.opensagres.xdocreport.converter.docx.poi.xhtml.XWPF2XHTMLConverter;
+import lombok.val;
+import org.apache.poi.POIXMLDocumentPart;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
@@ -35,17 +26,21 @@ import org.apache.poi.hwpf.usermodel.HeaderStories;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Hyperlink;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFPictureData;
-import org.freehep.graphicsio.emf.EMFInputStream;
-import org.freehep.graphicsio.emf.EMFRenderer;
+import org.apache.poi.openxml4j.opc.PackagePart;
+import org.apache.poi.openxml4j.opc.ZipPackagePart;
+import org.apache.poi.xwpf.converter.core.BasicURIResolver;
+import org.apache.poi.xwpf.converter.core.FileImageExtractor;
+import org.apache.poi.xwpf.converter.xhtml.XHTMLConverter;
+import org.apache.poi.xwpf.converter.xhtml.XHTMLOptions;
+import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
+import org.apache.poi.xwpf.usermodel.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import org.w3c.dom.Document;
 
 /**
  * @author: 牛杰
@@ -60,7 +55,8 @@ public class Word2Html {
     public static void main(String arg[]) throws Exception {
 
         try {
-            convert2Html("F:\\tt.doc", "f:\\file\\1.html");
+            //convert2Html("F:\\dd.doc", "f:\\file\\1.html");
+            docx2Html("F:/tt.docx","F:/docx.html");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,7 +94,7 @@ public class Word2Html {
 
         //System.out.println(node);
         //把页眉替换到头部
-            Element child = div.first().child(0);
+        Element child = div.first().child(0);
         child.before(node.toString());
         //删除多余页眉
         node.remove();
@@ -174,7 +170,6 @@ public class Word2Html {
             throws TransformerException, IOException,
             ParserConfigurationException {
         HWPFDocument wordDocument = new HWPFDocument(new FileInputStream(fileName));
-
 
         //WordToHtmlUtils.loadDoc(new FileInputStream(inputFile));
         HeaderStories headerStories = new HeaderStories(wordDocument);
@@ -255,7 +250,7 @@ public class Word2Html {
                 }
             }
         }
-        org.w3c.dom.Document htmlDocument = wordToHtmlConverter.getDocument();
+        Document htmlDocument = wordToHtmlConverter.getDocument();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         DOMSource domSource = new DOMSource(htmlDocument);
@@ -271,8 +266,205 @@ public class Word2Html {
         writeFile(new String(out.toByteArray()), outPutFile, header);
     }
 
+    /**
+     * 解析docx
+     *
+     * @param fileName   文件名称
+     * @param outPutFile 输出路径
+     * @throws TransformerException
+     * @throws IOException
+     * @throws ParserConfigurationException
+     */
+    public static String docx2Html(String fileName, String outPutFile) throws TransformerException, IOException,
+            ParserConfigurationException {
+        String fileOutName = outPutFile;
+        long startTime = System.currentTimeMillis();
+        XWPFDocument document = new XWPFDocument(new FileInputStream(fileName));
+        XHTMLOptions options = XHTMLOptions.create();
 
-    public static void emfConversionPng(List<String> list) throws IOException {
+        options.setIgnoreStylesIfUnused(false);
+        options.setFragment(true);
+
+        //页眉页脚
+        XWPFHeaderFooterPolicy headerFooterPolicy = document.getHeaderFooterPolicy();
+        XWPFHeader header = headerFooterPolicy.getDefaultHeader();  //页眉
+        XWPFFooter footer = headerFooterPolicy.getDefaultFooter();  //页脚
+
+        List<XWPFTable> headerTables = header.getTables();
+        for (XWPFTable table : headerTables) {
+            //页眉解析
+            CTTbl ctTbl = table.getCTTbl();    //xml格式
+
+            String s = ctTbl.toString();
+
+            String form = parsingXML(s);
+
+            System.out.println();
+
+            String text = table.getText();
+
+
+            //XHTMLConverter.getInstance().convert(part, new FileOutputStream("F:\\file\\1.html"), options);
+            System.out.println();
+        }
+
+        //List<XWPFTable> footerTables = footer.getTables();
+        XWPFDocument xwpfDocument = footer.getXWPFDocument();
+
+
+
+        //导出页眉图片
+        List<XWPFPictureData> allPictures = header.getAllPictures();
+        int size = allPictures.size();
+        if (size >0) {
+            for (XWPFPictureData picture : allPictures) {
+                byte[] data = picture.getData();
+                new FileOutputStream("F:\\file"+picture.getFileName()).write(data);
+            }
+        }
+
+        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        for (XWPFParagraph paragraph : paragraphs) {
+            String paragraphText = paragraph.getText();
+            System.out.println();
+        }
+
+
+        //导出图片
+        File imageFolder = new File("F:/file");
+        options.setExtractor(new FileImageExtractor(imageFolder));
+        // URI resolver word的html中图片的目录路径
+        options.URIResolver(new BasicURIResolver("images"));
+
+        File outFile = new File(fileOutName);
+        outFile.getParentFile().mkdirs();
+        OutputStream out = new FileOutputStream(outFile);
+        // org.apache.poi.xwpf.converter.xhtml.XHTMLConverter.convert.XHTMLConverter.java:72
+        XHTMLConverter.getInstance().convert(document, out, options);
+
+        FileInputStream fs = new FileInputStream(fileOutName);
+        byte[] buf = new byte[4096];
+        int readLength;
+        String htmls = "";
+        while (((readLength = fs.read(buf)) != -1)) {
+            htmls += (char)readLength;
+            //System.out.write(buf, 0, readLength);
+        }
+
+        //fileOutName
+        htmls = readFileToString(fileOutName, "html");
+        //	System.out.println("Generate " + htmls + " with " + (System.currentTimeMillis() - startTime) + " ms.");
+
+        return htmls;
+    }
+
+    /**
+     * 解析xml
+     * @param s
+     * @return
+     */
+    private static String parsingXML(String s) {
+        String html = "";
+        org.jsoup.nodes.Document doc = Jsoup.parse(s);
+
+        Elements wtr = doc.getElementsByTag("w:tr");
+        html += "<div style=\"width:50%; margin: 0 auto;\"><table border style=\"table-layout:fixed;border-collapse:collapse;border-spacing:0;width: 100%;\">";
+        for (Element tr : wtr) {
+            html += "<tr>";
+            Elements wtc = tr.getElementsByTag("w:tc");
+            for (Element tc : wtc) {
+                html += "<td><p style='margin: 0px 0px 0px;'>";
+                Elements wp = tc.getElementsByTag("w:p");
+                for (Element p : wp) {
+                    Elements wr = p.getElementsByTag("w:r");
+                    Elements wppr = p.getElementsByTag("w:pPr");
+
+                    String attrwjc = "";
+                    for (Element ppr : wppr) {
+                        Elements wjc = ppr.getElementsByTag("w:jc");
+
+                        if (!wjc.isEmpty()) {
+                            for (Element jc : wjc) {
+                                attrwjc = jc.attr("w:val");
+                            }
+                        }
+                    }
+
+                    for (Element r : wr) {
+                        Elements wt = r.getElementsByTag("w:t");
+                        Elements wrpr = r.getElementsByTag("w:rPr");
+
+                        String attrfont = "";
+                        String eleWb = "";
+                        String eleWbcs = "";
+                        for (Element rpr : wrpr) {
+                            Elements wrfont = rpr.getElementsByTag("w:rFonts");
+                            Elements wb = rpr.getElementsByTag("w:b");
+                            Elements wbcs = rpr.getElementsByTag("w:bCs");
+
+                            for (Element rfont : wrfont) {
+                                attrfont = "font-family: " + rfont.attr("w:hAnsi") + ";";
+                            }
+
+                            if (!wb.isEmpty()) {
+                                eleWb = "font-weight: bold ;";
+                            }
+
+                            /*if (!wbcs.isEmpty()) {
+                                eleWbcs = "<br />";
+                            }*/
+                        }
+
+                        for (Element t : wt) {
+                            if (attrwjc != "") {
+                                html += eleWbcs + "<p style='text-align: "+attrwjc+"'><span style=\"" + attrfont + eleWb  + "\">" + t.text() + "</span></p>";
+                            } else {
+                                html += eleWbcs + "<span style=\"" + attrfont + eleWb  + "\">" + t.text() + "</span>";
+                            }
+
+                        }
+
+                    }
+                }
+                html += "</p></td>";
+            }
+            html += "</tr>";
+        }
+        html += "</table></div>";
+        String s1 = html.toString();
+        return html;
+    }
+
+    public static String readFileToString(String path, String type) {
+        // 定义返回结果
+        String jsonString = "";
+        StringBuffer sb = new StringBuffer();
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(path)), "UTF-8"));// 读取文件
+            String thisLine = null;
+            while ((thisLine = in.readLine()) != null) {
+                sb.append(thisLine);
+                if ("txt".equals(type))
+                    sb.append("<br/>");
+            }
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException el) {
+                }
+            }
+        }
+        jsonString = sb.toString();
+        // 返回拼接好的JSON String
+        return jsonString;
+    }
+
+    /*public static void emfConversionPng(List<String> list) throws IOException {
         if (list.size() > 0) {
             // 对文件的命名进行重新修改
             for (int i = 0; i < list.size(); i++) {
@@ -305,7 +497,7 @@ public class Word2Html {
                         is.close();
                     }
                 } else if (saveUrl.contains("wmf") || saveUrl.contains("WMF")) {
-                    /*// 将wmf转svg
+                    // 将wmf转svg
                     String svgFile = saveUrl.substring(0,
                             saveUrl.lastIndexOf(".wmf"))
                             + ".svg";
@@ -314,10 +506,10 @@ public class Word2Html {
                     String jpgFile = saveUrl.substring(0,
                             saveUrl.lastIndexOf(".wmf"))
                             + ".png";
-                    svgToJpg(svgFile, jpgFile);*/
+                    svgToJpg(svgFile, jpgFile);
                 }
             }
         }
-    }
+    }*/
 
 }

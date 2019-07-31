@@ -2,162 +2,89 @@
 <html>
 <head>
     <meta charset=UTF-8">
-    <title>登录测试</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>测试</title>
+    <style>
+        p{
+            margin: 0px 0px 0px;
+        }
+
+    </style>
+
 </head>
 <body>
-<h2>Hello World! Web Socket by Spring</h2>
-<div>
-    <span>sessionId:</span>
-    <%
-        HttpSession s = request.getSession();
-        out.println(s.getId());
-    %>
-</div>
+    <div style="width:55%; margin: 0 auto;">
+    <!--表格-->
+        <table border style="table-layout:fixed;border-collapse:collapse;border-spacing:0; width: 100%;">
+            <tr>
+                <td colspan="2"></td>
+                <td colspan="5"><p style='text-align: right;'><span style="font-family: Times New Roman;font-weight: bold ;">Layered Process Audit Procedure</span>
+                </p>
+                    <p style='text-align: right;'><span style="font-family: 宋体;font-weight: bold ;">分层过程审核程序</span></p></td>
 
-<input id="sessionId" type="hidden" value="<%=session.getId() %>"/>
-<input id="text" type="text"/>
-<button onclick="send()">发送消息</button>
-<hr/>
-<button onclick="closeWebSocket()">关闭WebSocket连接</button>
-<hr/>
-<div id="message"></div>
+            </tr>
+            <tr style="padding: 5px">
+                <td colspan="7">
+                    <p><span style="font-family: 宋体;">■</span><span style="font-family: Times New Roman;">Procedure</span><span
+                          style="font-family: 宋体;">程序</span><span style="font-family: 宋体;"></span><span
+                          style="font-family: Times New Roman;">□</span><span style="font-family: Times New Roman;">Work Instruction</span><span
+                          style="font-family: 宋体;">作业指导书</span><span style="font-family: Times New Roman;">□</span><span
+                          style="font-family: Times New Roman;"></span><span
+                          style="font-family: Times New Roman;">Quality Plan</span><span style="font-family: 宋体;">质量计划</span><span
+                          style="font-family: Times New Roman;">□</span><span style="font-family: Times New Roman;"></span><span
+                          style="font-family: Times New Roman;">Others</span><span style="font-family: 宋体;">其它</span></p>
+                </td>
+            </tr>
+            <tr>
+            <td colspan="4">
+                <p><span style="font-family: Times New Roman;">QSI Document Control Number</span><span
+            style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">QSI</span><span
+                        style="font-family: Times New Roman;"></span><span style="font-family: 宋体;">文件控制编号</span></p></td>
+            <td colspan="3"><p><span style="font-family: Times New Roman;"></span><span
+            style="font-family: Times New Roman;">FC</span><span style="font-family: Times New Roman;">P</span><span
+            style="font-family: Times New Roman;">-</span><span
+            style="font-family: Times New Roman;">07-01-05</span></p>
+            </td>
+            </tr>
+
+
+            <tr>
+            <td colspan="1"><p><span style="font-family: Times New Roman;">Revision</span><span style="font-family: 宋体;">版本</span></p></td>
+
+            <td colspan="1"><p><span style="font-family: Times New Roman;">04</span></p></td>
+
+            <td colspan="2"><p><span style="font-family: Times New Roman;">Original Date</span><span style="font-family: 宋体;">撰写日期</span></p>
+            </td>
+
+            <td colspan="1"><p><span style="font-family: Times New Roman;">2009-02-28</span></p></td>
+
+            <td colspan="1"><p><span style="font-family: Times New Roman;">R</span><span
+            style="font-family: Times New Roman;">evised</span><span
+            style="font-family: Times New Roman;">Date</span><span style="font-family: 宋体;">修订</span><span
+            style="font-family: 宋体;">日期</span></p></td>
+
+            <td colspan="1"><p><span style="font-family: Times New Roman;"></span><span
+            style="font-family: Times New Roman;">20</span><span
+            style="font-family: Times New Roman;">19-04-03</span></p></td>
+            </tr>
+            <tr>
+            <td colspan="4"><p><span style="font-family: Times New Roman;">Classification</span><span
+            style="font-family: 宋体;">分类</span><span style="font-family: Times New Roman;">:</span><span
+            style="font-family: Times New Roman;">□</span><span style="font-family: Times New Roman;"></span><span
+            style="font-family: Times New Roman;">Confidential</span><span style="font-family: 宋体;">机密</span><span
+            style="font-family: Times New Roman;"></span><span style="font-family: 宋体;">■</span><span
+            style="font-family: Times New Roman;">Internal Use</span><span style="font-family: 宋体;">内部使用</span><span
+            style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">□</span><span
+            style="font-family: Times New Roman;"></span><span
+            style="font-family: Times New Roman;">Public</span><span
+            style="font-family: Times New Roman;">Use</span><span style="font-family: 宋体;">公开使用</span></td>
+            <td colspan="3"><span style="">Page</span><span style="">1</span><span style="">of</span><span style="">5</span></p></td>
+            </tr>
+        </table>
+
+
+    </div>
+
 </body>
 <script type="text/javascript" src="http://localhost:8088/static/js/sockjs-0.3.min.js"></script>
-<script type="text/javascript">
-    var websocket = null;
-    //判断当前浏览器是否支持WebSocket
-    //判断当前浏览器是否支持WebSocket
-    if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://localhost:8088/websocket/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
-    } else if ('MozWebSocket' in window) {
-        websocket = new MozWebSocket("ws://localhost:8088/websocket/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
-    } else {
-        websocket = new SockJS("http://localhost:8088/websocket/sockjs/webSocketBySpring/customWebSocketHandler?mchNo=" + 123);
-    }
-    //连接发生错误的回调方法
-    websocket.onerror = function () {
-        setMessageInnerHTML("WebSocket连接发生错误");
-    };
-
-    //连接成功建立的回调方法
-    websocket.onopen = function () {
-        setMessageInnerHTML("WebSocket连接成功");
-    }
-
-    //接收到消息的回调方法
-    websocket.onmessage = function (event) {
-        setMessageInnerHTML(event.data);
-    }
-
-    //连接关闭的回调方法
-    websocket.onclose = function () {
-        setMessageInnerHTML("WebSocket连接关闭");
-    }
-
-    //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
-    window.onbeforeunload = function () {
-        closeWebSocket();
-    }
-
-    //将消息显示在网页上
-    function setMessageInnerHTML(innerHTML) {
-        document.getElementById('message').innerHTML += innerHTML + '<br/>';
-    }
-
-    //关闭WebSocket连接
-    function closeWebSocket() {
-        websocket.close();
-    }
-
-    //发送消息
-    function send() {
-        var message = document.getElementById('text').value;
-        websocket.send(message);
-    }
-
-
-
-    function EMFTOBMP(): Boolean;stdcall;export;//将EMF类型转换为BMP文件
-    var SearchRes : TSearchRec;// 查找文件的结构
-    nFound, i : Integer;
-    Temp:Tbitmap;
-    EMF:TMetaFile;
-    reg       : TRegistry;
-    m_DestDir:String;
-    m_BmpDestFile:String;
-    DivNum,ModNum:integer;
-    BmpNum,BmpWidth:Integer;//定义BMP的显示位数和显示宽度
-    JudgeWidth:Integer;//定义BMP图是否限制宽度
-    begin
-    //初始化BMP文件的宽和显示位数。
-    BmpNum:=16;
-    BmpWidth:=832;
-    JudgeWidth:=1;
-    nFound := FindFirst(m_DestDir+'\*.emf', faAnyFile, SearchRes);
-    while nFound = 0 do
-        begin
-        //转换开始将EMF文件装换成BMP文件
-        EMF:=TMetaFile.Create;
-    Temp:=Tbitmap.Create();
-    case BmpNum of
-    1:
-    begin
-    Temp.PixelFormat:=pf1bit;
-    end;
-    4:
-    begin
-    Temp.PixelFormat:=pf4bit;
-    end;
-    16:
-    begin
-    Temp.PixelFormat:=pf16bit;
-    end;
-    24:
-    begin
-    Temp.PixelFormat:=pf24bit;
-    end;
-    32:
-    begin
-    Temp.PixelFormat:=pf32bit;
-    end;
-    end;
-    try
-    EMF.LoadFromFile(m_DestDir+'\'+SearchRes.Name);
-    if JudgeWidth=0 then
-    begin
-    temp.Width:=emf.Width;
-    end
-    else
-    begin
-    if emf.Width<BmpWidth then
-    begin
-    DivNum:=emf.Width div  32;
-    ModNum:=emf.Width mod  32;
-    if  ModNum>16 then
-    begin
-    Inc(DivNum);
-    end;
-    temp.Width:=DivNum * 32;
-    end
-    else
-    begin
-    temp.Width:=BmpWidth;
-    end;
-    end;
-    temp.Height:=emf.Height;
-    temp.Canvas.Draw(0,0,emf);
-    m_BmpDestFile:=Copy(SearchRes.Name,0,strlen(Pchar(SearchRes.Name))-4);
-    temp.SaveToFile(m_DestDir+'\'+m_BmpDestFile+'.bmp');
-    //删除Emf文件
-    DeleteFile(m_DestDir+'\'+SearchRes.Name);
-    finally
-    temp.free;
-    emf.free;
-    end;
-    nFound := FindNext(SearchRes);
-    end;
-    FindClose(SearchRes);
-    Result:=true;
-    end;
-</script>
 </html>

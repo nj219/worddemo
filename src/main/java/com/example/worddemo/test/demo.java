@@ -16,16 +16,16 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
- 
+
 public class demo {
 	private static int blank = 5;
- 
+
 	public static void main(String[] args) {
 		try {
 			// 获取所有图片
 			List<String> list = new ArrayList<>();
 			list.add("F:\\file\\4aba.emf");
- 
+
 			addPdfMark("F:\\2.pdf", "F:\\2.pdf", list);
 		} catch (Exception e) {
 			System.out.println("失败");
@@ -33,7 +33,7 @@ public class demo {
 		}
 		System.out.println("成功");
 	}
- 
+
 	public static void addPdfMark(String InPdfFile, String outPdfFile, List<String> imgList) throws Exception {
 		try {
 			// 获取PDF文档信息
@@ -46,7 +46,7 @@ public class demo {
 
 			PdfReader reader = new PdfReader(InPdfFile, "PDF".getBytes());
 			PdfStamper stamp = new PdfStamper(reader, new FileOutputStream(outPdfFile));
- 
+
 			for (String imgPath : imgList) {
 				Image img = Image.getInstance(imgPath);// 插入水印   
 				// 设置图片水印的位置。
@@ -56,10 +56,10 @@ public class demo {
 				under.addImage(img);
 				/*startAddress += Float.valueOf(Float.valueOf(getImgMsg(imgPath).get("width").toString()) + blank);*/
 			}
- 
+
 			stamp.close();// 关闭          
 			File tempfile = new File(InPdfFile);
- 
+
 			if (tempfile.exists()) {
 				tempfile.delete();
 			}
@@ -67,7 +67,7 @@ public class demo {
 			e.printStackTrace();
 		}
 	}
- 
+
 	public static Map<String, Object> getPdfMsg(String filePath) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		try {
@@ -76,7 +76,7 @@ public class demo {
 			int pages = pdfReader.getNumberOfPages();
 			// System.err.println(pages);
 			map.put("pageSize", pages);
- 
+
 			// 获取PDF 的宽高
 			PdfReader pdfreader = new PdfReader(filePath);
 			Document document = new Document(pdfreader.getPageSize(pages));
@@ -91,7 +91,7 @@ public class demo {
 		}
 		return map;
 	}
- 
+
 	public static Map<String, Object> getImgMsg(String imgPath) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		try {
