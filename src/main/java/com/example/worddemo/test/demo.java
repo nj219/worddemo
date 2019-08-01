@@ -1,3 +1,4 @@
+/*
 package com.example.worddemo.test;
  
 import java.awt.image.BufferedImage;
@@ -41,7 +42,9 @@ public class demo {
 			// 开始计算图片起始位置 * PDF文档宽度 - （所有图片的宽度 + 每张图片右侧加5 个单位的空白 ）
 			float startAddress = Float.valueOf(pdfMsg.get("width").toString());
 			for (String imgPath : imgList) {
-				/*startAddress -= (Double.valueOf(getImgMsg(imgPath).get("width").toString()) + blank);*/
+				*/
+/*startAddress -= (Double.valueOf(getImgMsg(imgPath).get("width").toString()) + blank);*//*
+
 			}
 
 			PdfReader reader = new PdfReader(InPdfFile, "PDF".getBytes());
@@ -54,7 +57,9 @@ public class demo {
 				// 开始水印 如果需要每一页都加图片，这里添加循环即可
 				PdfContentByte under = stamp.getUnderContent(Integer.valueOf(pdfMsg.get("pageSize").toString()));
 				under.addImage(img);
-				/*startAddress += Float.valueOf(Float.valueOf(getImgMsg(imgPath).get("width").toString()) + blank);*/
+				*/
+/*startAddress += Float.valueOf(Float.valueOf(getImgMsg(imgPath).get("width").toString()) + blank);*//*
+
 			}
 
 			stamp.close();// 关闭          
@@ -106,4 +111,4 @@ public class demo {
 		return map;
 	}
  
-}
+}*/

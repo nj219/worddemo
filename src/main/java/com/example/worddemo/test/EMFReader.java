@@ -1,3 +1,4 @@
+/*
 package com.example.worddemo.test;
 
 import java.awt.BorderLayout;
@@ -16,13 +17,15 @@ import javax.swing.JPanel;
 
 import org.freehep.graphicsio.emf.EMFInputStream;
 import org.freehep.graphicsio.emf.EMFRenderer;
+*/
 /**
  * download the third-party libraries here:
  * http://java.freehep.org/vectorgraphics/index.html
  * 
  * @author gloomyfish
  *
- */
+ *//*
+
 
 public class EMFReader {
 	public static void main(String[] args) {
@@ -51,9 +54,11 @@ public class EMFReader {
 
 		    // display it
 		    JPanel resultPanel = new JPanel() {
-		    	/**
+		    	*/
+/**
 				 * 
-				 */
+				 *//*
+
 				private static final long serialVersionUID = 1L;
 
 				public void paintComponent(Graphics g) {
@@ -75,4 +80,4 @@ public class EMFReader {
 		}
 	}
 
-}
+}*/

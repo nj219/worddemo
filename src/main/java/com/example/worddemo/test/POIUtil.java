@@ -1,3 +1,4 @@
+/*
 package com.example.worddemo.test;
 
 import java.io.FileNotFoundException;
@@ -15,18 +16,22 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
-/** 
- * excel读写工具类 */  
+*/
+/**
+ * excel读写工具类 *//*
+
 public class POIUtil {  
     private static Logger logger  = Logger.getLogger(POIUtil.class);
     private final static String xls = "xls";  
     private final static String xlsx = "xlsx";  
       
-    /** 
+    */
+/**
      * 读入excel文件，解析后返回 
      * @param file 
      * @throws IOException  
-     */  
+     *//*
+
     public static List<String[]> readExcel(MultipartFile file) throws IOException{  
         //检查文件  
         checkFile(file);  
@@ -141,4 +146,4 @@ public class POIUtil {
         }  
         return cellValue;  
     }  
-}
+}*/

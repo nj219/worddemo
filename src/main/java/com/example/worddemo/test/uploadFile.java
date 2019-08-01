@@ -1,8 +1,9 @@
+/*
 package com.example.worddemo.test;
 
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -20,20 +21,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+*/
 /**
  * @ClassName uploadFile
  * @Author shangpinyuan06
  * @Date 2019/7/8 14:36
- **/
+ **//*
+
 @RestController
 public class uploadFile {
 
-    /**
+    */
+/**
      * 按段落解析一个word文档
      * @param
      * @return
      * @throws Exception
-     */
+     *//*
+
     @ApiOperation(value="解析word文档", notes="按段落解析word文档")
     @RequestMapping(value = "upload", method = RequestMethod.POST)
     public Map uploadFile(@RequestParam(value = "file", required = true) MultipartFile file) throws Exception{
@@ -77,3 +82,4 @@ public class uploadFile {
         return wordMap;
     }
 }
+*/

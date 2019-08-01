@@ -3,10 +3,8 @@ package com.example.worddemo.test;
 import java.io.*;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -16,10 +14,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.sun.javaws.jnl.XMLFormat;
-import fr.opensagres.xdocreport.converter.docx.poi.xhtml.XWPF2XHTMLConverter;
-import lombok.val;
-import org.apache.poi.POIXMLDocumentPart;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
@@ -28,9 +22,6 @@ import org.apache.poi.hwpf.usermodel.HeaderStories;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.openxml4j.opc.ZipPackagePart;
-import org.apache.poi.poifs.property.Child;
 import org.apache.poi.xwpf.converter.core.BasicURIResolver;
 import org.apache.poi.xwpf.converter.core.FileImageExtractor;
 import org.apache.poi.xwpf.converter.xhtml.XHTMLConverter;
@@ -39,7 +30,6 @@ import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHdrFtr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
@@ -295,6 +285,17 @@ public class Word2Html {
         XWPFHeader header = headerFooterPolicy.getDefaultHeader();  //页眉
         XWPFFooter footer = headerFooterPolicy.getDefaultFooter();  //页脚
 
+        //导出页眉图片
+        List<XWPFPictureData> allPictures = header.getAllPictures();
+        int size = allPictures.size();
+        if (size >0) {
+            for (XWPFPictureData picture : allPictures) {
+                byte[] data = picture.getData();
+                new FileOutputStream("F:\\file"+picture.getFileName()).write(data);
+            }
+        }
+
+        org.jsoup.nodes.Document parse = null;
         //页眉
         List<XWPFTable> headerTables = header.getTables();
         for (XWPFTable table : headerTables) {
@@ -307,13 +308,13 @@ public class Word2Html {
             String form = parsingXML(s);
 
             //解析HTML替换某些参数
-            org.jsoup.nodes.Document parse = Jsoup.parse(form);
+            parse = Jsoup.parse(form);
             Elements div = parse.select("div");
 
             div.get(2).attr("style","display: inline-block;border-right:1px solid #000;padding-right: 50px");
             String text = div.get(3).text();
             div.get(3).attr("style","display: inline-block;text-align: right;float: right");
-            div.get(2).appendElement("img style=\"width:1.8988042in;height:0.4295625in;vertical-align:text-bottom;\" src=\"639c.png\"");
+            div.get(2).appendElement("img style=\"width:1.8988042in;height:0.4295625in;vertical-align:text-bottom;\" src=\"F:\\file" +allPictures.get(0).getFileName()+"\"");
 
             Elements span = parse.select("span");
             span.get(1).attr("style", "text-align: right;font-family: 宋体;font-weight: bold;");
@@ -337,22 +338,11 @@ public class Word2Html {
         String footerHtml = footerParsing(ctHdrFtr.toString());
 
 
-
-        //导出页眉图片
-        List<XWPFPictureData> allPictures = header.getAllPictures();
-        int size = allPictures.size();
-        if (size >0) {
-            for (XWPFPictureData picture : allPictures) {
-                byte[] data = picture.getData();
-                new FileOutputStream("F:\\file"+picture.getFileName()).write(data);
-            }
-        }
-
-        List<XWPFParagraph> paragraphs = document.getParagraphs();
+        /*List<XWPFParagraph> paragraphs = document.getParagraphs();
         for (XWPFParagraph paragraph : paragraphs) {
             String paragraphText = paragraph.getText();
             System.out.println();
-        }
+        }*/
 
 
         //导出图片
@@ -367,6 +357,7 @@ public class Word2Html {
         // org.apache.poi.xwpf.converter.xhtml.XHTMLConverter.convert.XHTMLConverter.java:72
         XHTMLConverter.getInstance().convert(document, out, options);
 
+
         FileInputStream fs = new FileInputStream(fileOutName);
         byte[] buf = new byte[4096];
         int readLength;
@@ -380,7 +371,16 @@ public class Word2Html {
         htmls = readFileToString(fileOutName, "html");
         //	System.out.println("Generate " + htmls + " with " + (System.currentTimeMillis() - startTime) + " ms.");
 
-        return htmls;
+        org.jsoup.nodes.Document parse1 = Jsoup.parse(htmls);
+
+
+        Elements body = parse1.select("body");
+        for (Element dy : body) {
+            dy.append(parse.toString());
+            dy.append(footerHtml);
+        }
+
+        return parse1.toString();
     }
 
     /**
